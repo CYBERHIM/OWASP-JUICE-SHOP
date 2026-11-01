@@ -54,3 +54,16 @@ While accessing the admin page is a flaw, allowing an unauthenticated user to ex
 4. Click the **trash can icon** next to the review.
 
 **Result:** The backend API accepts the unauthorized delete command and permanently removes the review from the database.
+
+## 4. View Basket (⭐⭐ 2-Star)
+**Objective:** View another user’s shopping basket.
+
+### The Vulnerability: Insecure Direct Object Reference (IDOR)
+The application assigns a Basket ID (`bid`) to a user's session storage but fails to verify on the backend if the requested basket actually belongs to the authenticated user. This allows for Horizontal Privilege Escalation.
+
+### Execution Steps:
+1. Log in to the application and add an item to the cart to initialize a basket.
+2. Open Developer Tools (F12) and navigate to the **Storage** tab.
+3. Under **Session Storage**, locate the `bid` (Basket ID) key.
+4. Change the numeric value of `bid` to another number (e.g., `1` or `2`).
+5. Refresh the page and click the **Your Basket** icon to load the hijacked cart.
