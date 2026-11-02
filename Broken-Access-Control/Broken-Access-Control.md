@@ -67,3 +67,15 @@ The application assigns a Basket ID (`bid`) to a user's session storage but fail
 3. Under **Session Storage**, locate the `bid` (Basket ID) key.
 4. Change the numeric value of `bid` to another number (e.g., `1` or `2`).
 5. Refresh the page and click the **Your Basket** icon to load the hijacked cart.
+
+## 5. Web3 Sandbox (⭐ 1-Star)
+**Objective:** Find an accidentally deployed code sandbox for writing smart contracts on the fly.
+
+### The Vulnerability: Security Through Obscurity
+Developers often leave internal testing environments (sandboxes) on production servers, assuming that if there is no menu button, nobody will find them. However, the path is still exposed in the frontend JavaScript routing map.
+
+### Execution Steps:
+1. Open Developer Tools (F12) and navigate to the **Debugger** or **Sources** tab.
+2. Search within the `main.js` file for the keyword `sandbox`.
+3. Locate the exposed routing path defined as `{path: "web3-sandbox"}`.
+4. Append `/#/web3-sandbox` to the base application URL and press Enter.
