@@ -1,0 +1,41 @@
+= Cross-Site Scripting (XSS)
+include::../attributes.adoc[]
+
+== Overview
+
+Cross-Site Scripting occurs when an application includes untrusted input in its output without properly sanitizing or encoding it, allowing an attacker to run arbitrary script in a victim's browser. One DOM-based XSS challenge was solved against the Search feature.
+
+== DOM XSS (*)
+
+=== Steps to Reproduce
+
+1. Open the browser DevTools Console (F12), since typing special characters directly into the Search field was unreliable on this machine.
+2. Run the following to set the search hash directly:
++
+[source,javascript]
+----
+location.hash = '/search?q=' + encodeURIComponent('<iframe src="javascript:alert(xss)">');
+----
+3. An alert box appears showing "xss", and a green success banner confirms the challenge is solved.
+
+image::dom-xss-solved.png[DOM XSS challenge solved, alert box showing xss]
+
+image::dom-xss-solved-banner.png[DOM XSS challenge solved, green success banner]
+
+=== Root Cause
+
+The search feature takes the q parameter from the URL and renders it back into the page's DOM without sanitizing or encoding HTML special characters. Because the payload is reflected directly into an <iframe> tag, the browser executes the injected javascript: URI as soon as the iframe is parsed. This is a client-side (DOM-based) XSS, the unsafe handling happens entirely in the browser's own JavaScript, not on the server.
+
+=== Impact
+
+Any attacker who can get a victim to open a crafted search URL can run arbitrary JavaScript in that victim's browser session. In a real attack, this isn't limited to showing an alert box, it could steal session cookies, perform actions as the victim, redirect them to a phishing page, or silently exfiltrate data they can see on the page.
+
+=== Remediation
+
+* Sanitize and HTML-encode all user-supplied input before it is inserted into the DOM, including search query parameters.
+* Use a framework's built-in safe-binding mechanisms (e.g. Angular's default output encoding) rather than manually injecting raw HTML, and avoid innerHTML-style assignments with untrusted data.
+* Apply a Content Security Policy (CSP) that restricts inline script execution and javascript: URIs, which would prevent this specific payload from executing even if the input were reflected unsanitized.
+
+== Testing Notes
+
+The payload required two backticks around "xss" (`` xss ``) rather than one for the alert to fire correctly on this build, a small but important detail, since a single quote mark silently failed instead of throwing a visible error. This is worth noting for anyone reproducing the exploit: XSS payloads can be sensitive to exact syntax, and a "no reaction" result does not necessarily mean the input is safe, it may just mean the specific payload syntax didn't parse.
