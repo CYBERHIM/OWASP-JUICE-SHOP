@@ -14,14 +14,14 @@ Sensitive data exposure occurs when an application makes confidential informatio
 3. Edit the URL by removing the filename, leaving only /ftp, and press Enter.
 4. The server returns a full directory listing of the /ftp folder instead of a single file.
 
-image::confidential-document-ftp-listing.png[Directory listing of the exposed /ftp folder]
+image::Screenshots/confidential-document-ftp-listing.png[Directory listing of the exposed /ftp folder]
 
 5. Among the listed files is acquisitions.md. Open it directly at /ftp/acquisitions.md.
 6. The file loads, revealing an internal document marked "This document is confidential! Do not distribute!", describing planned company acquisitions. A green success banner confirms the challenge is solved.
 
-image::confidential-document-solved.png[Confidential Document challenge solved, showing the acquisitions.md file content]
+image::Screenshots/confidential-document-solved.png[Confidential Document challenge solved, showing the acquisitions.md file content]
 
-image::confidential-document-banner.png[Confidential Document challenge solved, green success banner]
+image::Screenshots/confidential-document-banner.png[Confidential Document challenge solved, green success banner]
 
 === Root Cause
 

@@ -13,7 +13,7 @@ Broken authentication flaws occur when login, session, or credential-handling me
 2. Log in with admin@juice-sh.op as the email and admin123 as the password.
 3. The login succeeds and the challenge is marked solved, since admin123 is a known weak default credential for this account.
 
-image::password-strength-solved.png[Password Strength challenge solved via weak admin credentials]
+image::Screenshots/password-strength-solved.png[Password Strength challenge solved via weak admin credentials]
 
 === Root Cause
 
