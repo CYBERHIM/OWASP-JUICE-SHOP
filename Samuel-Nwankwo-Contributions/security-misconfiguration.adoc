@@ -22,7 +22,7 @@ fetch('/rest/user/login', {
 ----
 3. The server responds with a 500 error containing a full stack trace, and a green success banner confirms the challenge is solved.
 
-image::error-handling-solved.png[Error Handling challenge solved, showing 500 error stack trace and success banner]
+image::Screenshots/error-handling-solved.png[Error Handling challenge solved, showing 500 error stack trace and success banner]
 
 === Root Cause
 

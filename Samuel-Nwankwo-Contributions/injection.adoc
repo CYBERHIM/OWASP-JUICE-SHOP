@@ -14,7 +14,7 @@ Injection flaws occur when untrusted input is passed to an interpreter, such as 
 3. Enter any password.
 4. Click "Log in". The app authenticates as the first user in the Users table, the administrator, with no valid password supplied.
 
-image::login-admin-solved.png[Login Admin challenge solved via SQL injection]
+image::Screenshots/login-admin-solved.png[Login Admin challenge solved via SQL injection]
 
 === Root Cause
 
@@ -39,7 +39,7 @@ Complete authentication bypass with no credentials required. Because the query r
 3. Enter any password.
 4. Click "Log in". The app logs in as Bender without his real password.
 
-image::login-bender-solved.png[Login Bender challenge solved via SQL injection]
+image::Screenshots/login-bender-solved.png[Login Bender challenge solved via SQL injection]
 
 === Root Cause
 
@@ -69,7 +69,7 @@ fetch("/rest/products/search?q=" + encodeURIComponent("eggs')) UNION SELECT sql,
 ----
 3. Expand the returned object. The data array contains full CREATE TABLE statements for the application's database.
 
-image::database-schema-solved.png[Database Schema challenge solved, expanded console output showing CREATE TABLE statements]
+image::Screenshots/database-schema-solved.png[Database Schema challenge solved, expanded console output showing CREATE TABLE statements]
 
 === Root Cause
 
