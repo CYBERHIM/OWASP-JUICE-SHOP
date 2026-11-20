@@ -1,0 +1,43 @@
+= Sensitive Data Exposure
+include::../attributes.adoc[]
+
+== Overview
+
+Sensitive data exposure occurs when an application makes confidential information accessible without proper access controls, often through misconfigured file storage or publicly reachable directories. One challenge, Confidential Document, was solved by discovering an exposed internal file.
+
+== Confidential Document (*)
+
+=== Steps to Reproduce
+
+1. Navigate to the About Us page.
+2. Find and click the link labeled "Check out our boring terms of use if you are interested in such lame stuff", which points to /ftp/legal.md.
+3. Edit the URL by removing the filename, leaving only /ftp, and press Enter.
+4. The server returns a full directory listing of the /ftp folder instead of a single file.
+
+image::confidential-document-ftp-listing.png[Directory listing of the exposed /ftp folder]
+
+5. Among the listed files is acquisitions.md. Open it directly at /ftp/acquisitions.md.
+6. The file loads, revealing an internal document marked "This document is confidential! Do not distribute!", describing planned company acquisitions. A green success banner confirms the challenge is solved.
+
+image::confidential-document-solved.png[Confidential Document challenge solved, showing the acquisitions.md file content]
+
+image::confidential-document-banner.png[Confidential Document challenge solved, green success banner]
+
+=== Root Cause
+
+The /ftp directory is served by the web server with directory listing (indexing) enabled and no authentication or access control applied. This means any file placed in that folder, regardless of its intended sensitivity, is both browsable and directly downloadable by anyone who finds or guesses the path. The presence of a single legitimately public file (legal.md) linked from the site does not justify leaving the entire parent directory open.
+
+=== Impact
+
+Beyond the acquisitions document, the same listing exposed other files with clearly sensitive names, including incident-support.kdbx (a password database file) and suspicious_errors.yml. This indicates the exposure is not an isolated mistake but a structural misconfiguration of the whole directory, with the potential to leak credentials, internal incident data, and confidential business plans all from one unprotected folder.
+
+=== Remediation
+
+* Disable directory listing/indexing on all web server directories; only explicitly linked files should ever be reachable.
+* Move any file not intended for public access outside the web root entirely, rather than relying on obscurity (no link to it) to keep it private.
+* Apply authentication and access control to any folder that must remain within the web root but contains internal or sensitive files.
+* Periodically audit publicly reachable directories for files that should not be there, this class of issue tends to accumulate over time as files are added for convenience and never removed.
+
+== Testing Notes
+
+The directory listing revealed several other sensitive-looking files beyond the one targeted by this challenge (coupons_2013.md.bak, incident-support.kdbx, package.json.bak, suspicious_errors.yml), none of which were explored further here since they fall outside this specific challenge's scope. They are noted in this write-up because they reinforce the root cause: this is a directory-wide misconfiguration, not a one-off leaked file, and remediation needs to address the folder's access control, not just remove the one file that was found.

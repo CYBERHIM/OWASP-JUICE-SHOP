@@ -1,0 +1,43 @@
+= Security Misconfiguration
+include::../attributes.adoc[]
+
+== Overview
+
+Security misconfiguration covers cases where an application is deployed with insecure default settings, overly detailed error messages, or other configuration gaps that leak information an attacker can use. One Error Handling challenge was solved, demonstrating this through the application's own error responses.
+
+== Error Handling (*)
+
+=== Steps to Reproduce
+
+1. Open the browser DevTools Console (F12).
+2. Run the following to submit a deliberately malformed login request:
++
+[source,javascript]
+----
+fetch('/rest/user/login', {
+  method: 'POST',
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({email: "'", password: 'x'})
+}).then(r => r.text()).then(console.log);
+----
+3. The server responds with a 500 error containing a full stack trace, and a green success banner confirms the challenge is solved.
+
+image::error-handling-solved.png[Error Handling challenge solved, showing 500 error stack trace and success banner]
+
+=== Root Cause
+
+The login endpoint passes the raw email input into a database query without sanitization (the same underlying flaw documented under Injection). When the single quote breaks the SQL syntax, the resulting database error is not caught and replaced with a generic message, it is passed straight through to the client, stack trace and all. The response revealed the Express framework version, the Sequelize/SQLite ORM internals, and full local file system paths (e.g. C:\Users\COMPAQ\Downloads\juice-shop_16.0.1\node_modules\sequelize\...).
+
+=== Impact
+
+Detailed error messages like this hand an attacker a free roadmap of the application's internals: the exact libraries and versions in use (useful for looking up known vulnerabilities), the underlying database engine, and file system structure. None of this should ever reach a client response. Combined with the Injection flaw that triggered it, this also confirms to an attacker that their malformed input reached the database layer unfiltered, effectively acting as free feedback for refining further injection attempts.
+
+=== Remediation
+
+* Implement centralized, generic error handling that returns a safe, non-descriptive message to the client (e.g. "An unexpected error occurred") while logging full details server-side only.
+* Disable framework debug/verbose error modes in production environments.
+* Fix the underlying input sanitization issue (see Injection remediation), since this misconfiguration is only exploitable because that flaw exists upstream.
+
+== Testing Notes
+
+The same single-quote payload sent to /rest/products/search (see Injection) returned a normal 200 OK with no error, while sending it to the login endpoint produced this 500 error. This is the same observation noted under Injection, but it is worth repeating here specifically because it shows the misconfiguration (verbose error leakage) is not uniform across the app; some endpoints appear to already tolerate or reject the same character safely, while others crash loudly. A full audit would need to check every input-handling endpoint individually rather than assuming one fix covers them all.

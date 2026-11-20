@@ -1,0 +1,34 @@
+= Broken Authentication
+include::../attributes.adoc[]
+
+== Overview
+
+Broken authentication flaws occur when login, session, or credential-handling mechanisms are implemented weakly enough that an attacker can bypass them or guess their way in. One Broken Authentication challenge was solved, uncovered as a direct side effect of the SQL injection work done under Injection.
+
+== Password Strength (*)
+
+=== Steps to Reproduce
+
+1. Navigate to /#/login.
+2. Log in with admin@juice-sh.op as the email and admin123 as the password.
+3. The login succeeds and the challenge is marked solved, since admin123 is a known weak default credential for this account.
+
+image::password-strength-solved.png[Password Strength challenge solved via weak admin credentials]
+
+=== Root Cause
+
+The administrator account was left with an easily guessable password, admin123, which also appears in common password lists and rainbow tables. There is no enforced password complexity policy, and no indication the account was ever required to change its default credential after setup.
+
+=== Impact
+
+A weak password on the highest-privilege account undermines every other security control in the app. Even if SQL Injection or other bypasses were patched, an attacker could still gain full admin access simply by trying a handful of common passwords. It is a single point of failure for the entire application's security model.
+
+=== Remediation
+
+* Enforce a strong password policy (minimum length, complexity, rejection of common/breached passwords) at account creation and on password change.
+* Force a mandatory password change on first login for any account using a default or seeded credential.
+* Add account lockout or rate-limiting after repeated failed login attempts, particularly on privileged accounts, to slow down brute-force and credential-stuffing attempts.
+
+== Testing Notes
+
+This challenge solved itself automatically once the admin account was accessed via its known weak password during Injection testing. It wasn't pursued as a separate attack path, but it illustrates a useful point: weak authentication and injection flaws often compound each other, a system can have multiple independent ways to reach the same high-value target, which is worth noting when prioritizing fixes. Patching the injection alone would not have closed this gap.
